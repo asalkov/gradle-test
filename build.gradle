@@ -1,0 +1,61 @@
+group 'com.ansa'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+apply plugin: 'application'
+
+mainClassName="com.ansa.Runner"
+
+//sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+
+    compile files("config")
+
+    compile group: 'org.springframework', name: 'spring-core', version: '5.0.6.RELEASE'
+
+    compile group: 'org.springframework', name: 'spring-context', version: '5.0.6.RELEASE'
+}
+
+distributions {
+    main {
+        contents {
+            from ('config/application.properties'){
+                into 'config'
+            }
+        }
+    }
+}
+
+jar {
+    manifest {
+        attributes(
+                'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
+                'Main-Class': 'com.ansa.Runner'
+        )
+    }
+}
+
+//tasks.withType(CreateStartScripts) {
+//    classpath += files('config/application.properties')
+//}
+
+startScripts {
+    classpath += files('config/application.properties')
+    doLast {
+        def windowsScriptFile = file getWindowsScript()
+        def unixScriptFile    = file getUnixScript()
+        windowsScriptFile.text = windowsScriptFile.text.replace('%APP_HOME%\\lib\\application.properties', '%APP_HOME%\\config\\application.properties')
+        unixScriptFile.text  = unixScriptFile.text.replace('$APP_HOME/lib/application.properties', '$APP_HOME/config/application.properties')
+    }
+}
+
+
+
+
